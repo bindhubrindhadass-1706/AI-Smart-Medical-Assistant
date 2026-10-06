@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diabetes Prediction</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .predict {
+            width: 100%;
+        }
+
+        .back {
+            margin-bottom: 10px;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <button class="back" onclick="goBack()">← Back to Dashboard</button>
+
+    <h1>🩺 Diabetes Prediction</h1>
+
+    <label>Age</label>
+    <input type="number" id="age" placeholder="Enter age">
+
+    <label>Glucose Level</label>
+    <input type="number" id="glucose" placeholder="Enter glucose level">
+
+    <label>Blood Pressure</label>
+    <input type="number" id="bloodPressure" placeholder="Enter blood pressure">
+
+    <label>BMI</label>
+    <input type="number" id="bmi" step="0.1" placeholder="Enter BMI">
+
+    <label>Insulin</label>
+    <input type="number" id="insulin" placeholder="Enter insulin level">
+
+    <label>Pregnancies</label>
+    <input type="number" id="pregnancies" placeholder="Enter pregnancies">
+
+    <label>Diabetes Pedigree Function</label>
+    <input type="number" id="pedigree" step="0.001"
+           placeholder="Enter pedigree value">
+
+    <label>Skin Thickness</label>
+    <input type="number" id="skinThickness"
+           placeholder="Enter skin thickness">
+
+    <button class="predict" onclick="predictDiabetes()">
+        Predict Diabetes
+    </button>
+
+    <div id="result"></div>
+
+</div>
+
+<script>
+
+const API_BASE = "http://localhost:8080/api";
+
+async function predictDiabetes() {
+
+    const age = document.getElementById("age").value;
+    const glucose = document.getElementById("glucose").value;
+    const bloodPressure = document.getElementById("bloodPressure").value;
+    const bmi = document.getElementById("bmi").value;
+    const insulin = document.getElementById("insulin").value;
+    const pregnancies = document.getElementById("pregnancies").value;
+    const pedigree = document.getElementById("pedigree").value;
+    const skinThickness = document.getElementById("skinThickness").value;
+
+    if (
+        !age ||
+        !glucose ||
+        !bloodPressure ||
+        !bmi ||
+        !insulin ||
+        !pregnancies ||
+        !pedigree ||
+        !skinThickness
+    ) {
+        alert("Please fill all fields");
+        return;
+    }
+
+    const requestData = {
+        age: Number(age),
+        glucose: Number(glucose),
+        bloodPressure: Number(bloodPressure),
+        bmi: Number(bmi),
+        insulin: Number(insulin),
+        pregnancies: Number(pregnancies),
+        pedigree: Number(pedigree),
+        skinThickness: Number(skinThickness)
+    };
+
+    console.log("Prediction request:", requestData);
+
+    try {
+
+        const response = await fetch(`${API_BASE}/prediction`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        const data = await response.json();
+
+        console.log("Prediction response:", data);
+
+        const result = document.getElementById("result");
+
+        if (response.ok) {
+
+            result.innerHTML =
+                "Prediction Result: " +
+                (data.prediction || data.result || JSON.stringify(data));
+
+        } else {
+
+            result.innerHTML =
+                "Prediction failed: " +
+                (data.message || JSON.stringify(data));
+        }
+
+    } catch (error) {
+
+        console.error("Prediction error:", error);
+
+        document.getElementById("result").innerHTML =
+            "Backend connection failed";
+    }
+}
+
+function goBack() {
+    window.location.href = "dashboard.html";
+}
+
+</script>
+
+</body>
+</html>
